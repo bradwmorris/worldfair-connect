@@ -49,10 +49,8 @@ export const updateSession = async (request: NextRequest) => {
       if (!user.error) {
         // User is logged in, redirect to dashboard
         return NextResponse.redirect(new URL("/dashboard", request.url));
-      } else {
-        // User is not logged in, redirect to sign-up
-        return NextResponse.redirect(new URL("/sign-up", request.url));
       }
+      // Unauthenticated users can view the homepage, so do nothing
     }
 
     return response;

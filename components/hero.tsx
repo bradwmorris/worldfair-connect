@@ -8,7 +8,7 @@ export default function Header() {
     <div className="flex flex-col gap-16 items-center">
       <h1 className="sr-only italic">an experiment</h1>
       <p className="text-3xl lg:text-4xl !leading-tight mx-auto max-w-xl text-center">
-        map your world's fair connections
+        map your ai world fair connections
       </p>
       <div className="flex gap-2 mt-4">
         <Button asChild size="sm" variant="outline">
