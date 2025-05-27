@@ -1,0 +1,84 @@
+{
+  "sessions": [
+    {
+      "id": "915928",
+      "title": "How LLMs work for Web Devs: GPT in 600 lines of Vanilla JS",
+      "description": "Don't be intimidated. Modern AI can feel like magic, but underneath the hood are principles that web developers can understand, even if you don't have a machine learning background. In this workshop, we'll explore a complete GPT-2 inference implementation built entirely in Vanilla JS. This JavaScript translation of the popular \"Spreadsheets-are-all-you-need\" approach will let you debug and step through a real LLM line by line without the overhead of learning a new language, framework, or even IDE.\r\n\r\nAll the major LLMs, including ChatGPT, Claude, DeepSeek, and Llama, inherit from GPT-2's architecture, making this exploration a solid foundation to understand modern AI systems and comprehend the latest research.\r\n\r\nWhile we won't have time to cover *everything*, you'll gain the essential knowledge to understand the key concepts that matter when building with LLMs, including how they:\r\n\r\n-Convert raw text into meaningful tokens\r\n- Represent semantic meaning through vector embeddings\r\n- Train neural networks through gradient descent\r\n- Generate text with sampling algorithms like top-k, top-p, and temperature\r\n\r\nThis intense but beginner-friendly workshop is designed specifically for web developers diving into ML and AI for the first time. It’s your \"missing AI degree\" in just two hours. You'll walk away with an intuitive mental model of how Transformers work that you can apply immediately to your own LLM-powered projects.",
+      "startsAt": "2025-06-03T09:00:00",
+      "endsAt": "2025-06-03T12:00:00",
+      "isServiceSession": false,
+      "isPlenumSession": false,
+      "speakers": [
+        "188818c8-ec9f-49ac-a4a0-3df83a99dc69"
+      ],
+      "categoryItems": [],
+      "questionAnswers": [],
+      "roomId": 61338,
+      "liveUrl": null,
+      "recordingUrl": null,
+      "status": "Accepted",
+      "isInformed": true,
+      "isConfirmed": true
+    },
+    {
+      "id": "936933",
+      "title": "Forget RAG Pipelines—Build Production-Ready AI Agents in 15 Minutes",
+      "description": "Want to take advantage of your data, but don't want to reinvent RAG infrastructure? Join our workshop and see how you can deploy Agentic RAG in minutes using Contextual AI's managed RAG solution. We'll explore how Contextual handles intelligent parsing and chunking of your data, retrieves information with state of the art accuracy, and generates responses with a multi layered set of guardrails against hallucinations. Together, we'll build an end-to-end Agentic RAG pipeline and demonstrate its integration with Claude Desktop via MCP, so you can see how this could plug into your existing ecosystem. \r\n\r\nBy the end of this session, you'll have a functioning Agentic RAG prototype that you can easily customize and deploy to production for your specific use cases, even with complex, unstructured documents. ",
+      "startsAt": "2025-06-03T09:00:00",
+      "endsAt": "2025-06-03T10:20:00",
+      "isServiceSession": false,
+      "isPlenumSession": false,
+      "speakers": [
+        "274d2bf7-9245-4810-94e4-7fd04d644ed3",
+        "a2781a64-4f88-4176-87b5-17824930f0c5"
+      ],
+      "categoryItems": [],
+      "questionAnswers": [],
+      "roomId": 67096,
+      "liveUrl": null,
+      "recordingUrl": null,
+      "status": "Accepted",
+      "isInformed": true,
+      "isConfirmed": false
+    },
+    {
+      "id": "933714",
+      "title": "Intro to GraphRAG",
+      "description": "Learn the foundations of GraphRAG, starting with knowledge graph construction and then common retrieval patterns.",
+      "startsAt": "2025-06-03T09:00:00",
+      "endsAt": "2025-06-03T10:20:00",
+      "isServiceSession": false,
+      "isPlenumSession": false,
+      "speakers": [
+        "ee20717b-b4fe-4bc8-afdb-3f5001dbb733"
+      ],
+      "categoryItems": [],
+      "questionAnswers": [],
+      "roomId": 67097,
+      "liveUrl": null,
+      "recordingUrl": null,
+      "status": "Accepted",
+      "isInformed": true,
+      "isConfirmed": false
+    },
+    {
+      "id": "929509",
+      "title": "Kernels, RL, Reasoning, Reward Functions & Quantization",
+      "description": "Discover if writing custom kernels is still worth it, explore how to do Reinforcement Learning (RL) and reward functions properly, and learn why quantization is key to local LLMs - plus tips to gain accuracy.",
+      "startsAt": "2025-06-03T09:00:00",
+      "endsAt": "2025-06-03T12:00:00",
+      "isServiceSession": false,
+      "isPlenumSession": false,
+      "speakers": [
+        "57cf0bb0-1a05-4ec8-9887-5b31b07f9bec"
+      ],
+      "categoryItems": [],
+      "questionAnswers": [],
+      "roomId": 67098,
+      "liveUrl": null,
+      "recordingUrl": null,
+      "status": "Accepted",
+      "isInformed": true,
+      "isConfirmed": false
+    },
+    

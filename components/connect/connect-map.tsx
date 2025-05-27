@@ -8,6 +8,7 @@ import ReactFlow, {
   Edge,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
+import * as d3 from 'd3-force';
 
 // Define types for your data
 interface Person {
@@ -100,20 +101,48 @@ const ConnectMap: React.FC<ConnectMapProps> = ({ people, talks, ideas, talkSpeak
   }
 
   const { nodes, edges } = useMemo(() => {
-    const allNodes: Node[] = [];
-    const allEdges: Edge[] = [];
-    const nodeRadius = 250;
-    const centerX = 600;
-    const centerY = 500;
-    const personCount = people.length;
-    // Arrange people in a circle
-    people.forEach((person, idx) => {
-      const angle = (2 * Math.PI * idx) / personCount;
-      const x = centerX + nodeRadius * Math.cos(angle);
-      const y = centerY + nodeRadius * Math.sin(angle);
+    // --- Build d3 nodes and links ---
+    type ForceNode = d3.SimulationNodeDatum & { id: string };
+    type ForceLink = d3.SimulationLinkDatum<ForceNode>;
+    const d3Nodes: ForceNode[] = people.map((person) => ({
+      id: `person-${person.id}`,
+    }));
+    // Person-to-person connections
+    const d3Links: ForceLink[] = getPersonToPersonConnections().map(conn => ({
+      source: `person-${conn.author_person_id}`,
+      target: `person-${conn.linked_target_person_id}`,
+    }));
+    // Person-to-talk connections (as links between people and speakers)
+    getPersonToTalkConnections().forEach(conn => {
+      const speakers = conn.linked_talk_id ? getSpeakersForTalk(conn.linked_talk_id) : [];
+      speakers.forEach(speaker => {
+        if (speaker && conn.author_person_id !== speaker.id) {
+          d3Links.push({
+            source: `person-${conn.author_person_id}`,
+            target: `person-${speaker.id}`,
+          });
+        }
+      });
+    });
+
+    // --- Run d3-force simulation ---
+    const width = 1200, height = 900;
+    const simulation = d3.forceSimulation(d3Nodes)
+      .force('link', d3.forceLink(d3Links).id((d: any) => d.id).distance(220))
+      .force('charge', d3.forceManyBody().strength(-600))
+      .force('center', d3.forceCenter(width / 2, height / 2))
+      .stop();
+    // Run the simulation for a fixed number of ticks
+    for (let i = 0; i < 200; ++i) simulation.tick();
+
+    // --- Build React Flow nodes with d3 positions ---
+    const allNodes: Node[] = people.map((person) => {
+      const d3Node = d3Nodes.find(n => n.id === `person-${person.id}`);
+      const x = (d3Node && 'x' in d3Node && typeof d3Node.x === 'number') ? d3Node.x : width / 2;
+      const y = (d3Node && 'y' in d3Node && typeof d3Node.y === 'number') ? d3Node.y : height / 2;
       const isSpeaker = getLabels(person).includes('speaker');
       const talksForSpeaker = isSpeaker ? getTalksForSpeaker(person.id) : [];
-      allNodes.push({
+      return {
         id: `person-${person.id}`,
         type: 'default',
         data: {
@@ -178,10 +207,11 @@ const ConnectMap: React.FC<ConnectMapProps> = ({ people, talks, ideas, talkSpeak
           background: 'transparent',
           border: 'none',
         },
-      });
+      };
     });
 
     // Edges: person-to-person connections
+    const allEdges: Edge[] = [];
     getPersonToPersonConnections().forEach(conn => {
       allEdges.push({
         id: `edge-person-to-person-${conn.id}`,
@@ -192,7 +222,6 @@ const ConnectMap: React.FC<ConnectMapProps> = ({ people, talks, ideas, talkSpeak
         animated: true,
       });
     });
-
     // Edges: person-to-speaker-of-talk connections
     getPersonToTalkConnections().forEach(conn => {
       const speakers = conn.linked_talk_id ? getSpeakersForTalk(conn.linked_talk_id) : [];
@@ -209,7 +238,6 @@ const ConnectMap: React.FC<ConnectMapProps> = ({ people, talks, ideas, talkSpeak
         }
       });
     });
-
     return { nodes: allNodes, edges: allEdges };
   }, [people, talks, ideas, talkSpeakers]);
 

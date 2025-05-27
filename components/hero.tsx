@@ -5,10 +5,10 @@ import Link from "next/link";
 
 export default function Header() {
   return (
-    <div className="flex flex-col gap-16 items-center">
+    <div className="flex flex-col gap-24 items-center py-16">
       <h1 className="sr-only italic">an experiment</h1>
-      <p className="text-3xl lg:text-4xl !leading-tight mx-auto max-w-xl text-center">
-        map your ai world fair connections
+      <p className="text-4xl lg:text-6xl !leading-tight mx-auto max-w-3xl text-center font-semibold">
+        map your ai world's fair <span className="underline decoration-green-500 decoration-4 text-green-600">connections</span>
       </p>
       <div className="flex gap-2 mt-4">
         <Button asChild size="sm" variant="outline">

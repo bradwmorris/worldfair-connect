@@ -37,7 +37,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <main className="min-h-screen flex flex-col items-center">
-            <div className="flex-1 w-full flex flex-col gap-20 max-w-5xl mx-auto px-4">
+            <div className="flex-1 w-full flex flex-col gap-20 max-w-7xl mx-auto px-4">
               <nav className="w-full flex justify-center border-b border-b-foreground/10 h-16">
                 <div className="w-full max-w-5xl flex justify-between items-center p-3 px-5 text-sm">
                   <div className="flex gap-5 items-center font-semibold">
@@ -45,11 +45,7 @@ export default function RootLayout({
                       <Home size={20} />
                       <span className="sr-only">Home</span>
                     </Link>
-                    <Link href="/map" title="Map" className="flex items-center gap-1">
-                      <Map size={20} />
-                      <span className="sr-only">Map</span>
-                    </Link>
-                    <Link href="/chat" title="Chat" className="flex items-center gap-1">
+                    <Link href="/chat" title="Chat" className="flex items-center gap-1 ring-2 ring-green-500 rounded-full p-1 animate-pulse">
                       <MessagesSquare size={20} />
                       <span className="sr-only">Chat</span>
                     </Link>
@@ -64,8 +60,36 @@ export default function RootLayout({
                 {children}
               </div>
 
-              <footer className="w-full flex items-center justify-center border-t mx-auto text-center text-xs gap-8 py-16">
-                {/* <ThemeSwitcher /> */}
+              <footer className="w-full flex items-center justify-center border-t mx-auto text-center text-xs gap-2 py-16">
+                <span>created by </span>
+                <a
+                  href="https://x.com/bradwmorris"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="bradwmorris on X"
+                  className="underline decoration-green-500 decoration-2 underline-offset-4 hover:text-green-600 transition-colors font-medium"
+                >
+                  brad
+                </a>
+                <a
+                  href="https://x.com/bradwmorris"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="bradwmorris on X"
+                  className="flex items-center gap-1 underline decoration-green-500 decoration-2 underline-offset-4 hover:text-green-600 transition-colors"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 1200 1227"
+                    fill="currentColor"
+                    width="16"
+                    height="16"
+                    aria-hidden="true"
+                  >
+                    <path d="M1199.61 21.5H974.09L600.01 505.09L225.91 21.5H.39l470.13 617.5L0 1205.5h225.91l374.1-504.5l374.1 504.5h225.91l-470.52-566.5l470.11-617.5ZM900.6 1102.5l-300.59-406.1l-300.59 406.1H180.3l419.71-567.5L180.3 124.5h119.12l300.59 406.1l300.59-406.1h119.12l-419.71 567.5l419.71 567.5H900.6Z"/>
+                  </svg>
+                  <span className="sr-only">@bradwmorris</span>
+                </a>
               </footer>
             </div>
           </main>
