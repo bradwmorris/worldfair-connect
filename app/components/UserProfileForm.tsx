@@ -1,5 +1,5 @@
 "use client";
-import { useState, ChangeEvent, FormEvent } from "react";
+import { useState, ChangeEvent, FormEvent, useRef } from "react";
 import { createClient } from "@/utils/supabase/client";
 
 interface UserProfileFormProps {
@@ -9,6 +9,7 @@ interface UserProfileFormProps {
     github_username?: string;
     twitter_username?: string;
     labels?: string;
+    avatar_url?: string;
   } | null;
   user: {
     id: string;
@@ -26,6 +27,9 @@ export default function UserProfileForm({ person, user }: UserProfileFormProps) 
   });
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const [avatarUrl, setAvatarUrl] = useState(person?.avatar_url || "");
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -43,6 +47,41 @@ export default function UserProfileForm({ person, user }: UserProfileFormProps) 
     setLoading(false);
     if (error) setMessage("Error updating profile");
     else setMessage("Profile updated!");
+  };
+
+  const handleAvatarChange = async (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    setMessage("");
+    const supabase = createClient();
+    const fileExt = file.name.split('.').pop();
+    const filePath = `${user.id}.${fileExt}`;
+    // Upload to storage bucket 'pp'
+    const { error: uploadError } = await supabase.storage.from('pp').upload(filePath, file, { upsert: true });
+    if (uploadError) {
+      setUploading(false);
+      setMessage("Error uploading image");
+      return;
+    }
+    // Get public URL
+    const { data } = supabase.storage.from('pp').getPublicUrl(filePath);
+    const publicUrl = data?.publicUrl;
+    if (!publicUrl) {
+      setUploading(false);
+      setMessage("Error getting image URL");
+      return;
+    }
+    // Update avatar_url in people table
+    const { error: updateError } = await supabase.from("people").update({ avatar_url: publicUrl }).eq("id", user.id);
+    if (updateError) {
+      setUploading(false);
+      setMessage("Error saving avatar");
+      return;
+    }
+    setAvatarUrl(publicUrl);
+    setUploading(false);
+    setMessage("Profile image updated!");
   };
 
   return (
@@ -93,6 +132,29 @@ export default function UserProfileForm({ person, user }: UserProfileFormProps) 
           onChange={handleChange}
         />
       </label>
+      {avatarUrl && (
+        <div className="flex flex-col items-center gap-2">
+          <img src={avatarUrl} alt="Profile avatar" className="w-24 h-24 rounded-full object-cover border border-border shadow" />
+          <button type="button" className="text-xs text-primary underline" onClick={() => fileInputRef.current?.click()} disabled={uploading}>
+            {uploading ? "Uploading..." : "Change image"}
+          </button>
+        </div>
+      )}
+      {!avatarUrl && (
+        <div className="flex flex-col items-center gap-2">
+          <button type="button" className="text-xs text-primary underline" onClick={() => fileInputRef.current?.click()} disabled={uploading}>
+            {uploading ? "Uploading..." : "Add profile image"}
+          </button>
+        </div>
+      )}
+      <input
+        type="file"
+        accept="image/*"
+        ref={fileInputRef}
+        style={{ display: "none" }}
+        onChange={handleAvatarChange}
+        disabled={uploading}
+      />
       <button
         type="submit"
         className="mt-2 py-2 px-4 rounded-md font-semibold bg-primary text-primary-foreground hover:bg-primary/90 transition border border-primary shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:opacity-60"
