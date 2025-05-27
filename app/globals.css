@@ -35,30 +35,30 @@
   }
 
   .dark {
-    --background: 220 16% 12%;
+    --background: 0 0% 12%;
     --foreground: 0 0% 98%;
-    --card: 220 16% 14%;
+    --card: 0 0% 14%;
     --card-foreground: 0 0% 98%;
-    --popover: 220 16% 14%;
+    --popover: 0 0% 14%;
     --popover-foreground: 0 0% 98%;
     --primary: 140 60% 45%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 220 10% 20%;
+    --secondary: 0 0% 20%;
     --secondary-foreground: 0 0% 98%;
-    --muted: 220 10% 18%;
+    --muted: 0 0% 18%;
     --muted-foreground: 0 0% 63.9%;
-    --accent: 220 10% 18%;
+    --accent: 0 0% 18%;
     --accent-foreground: 0 0% 98%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
-    --border: 220 10% 22%;
-    --input: 220 10% 22%;
+    --border: 0 0% 22%;
+    --input: 0 0% 22%;
     --ring: 0 0% 83.1%;
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
+    --chart-1: 0 0% 50%;
+    --chart-2: 160 0% 45%;
+    --chart-3: 30 0% 55%;
+    --chart-4: 280 0% 60%;
+    --chart-5: 340 0% 55%;
   }
 
   @keyframes pulse-search {

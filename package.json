@@ -1,5 +1,8 @@
 {
   "private": true,
+  "name": "worldfair-connect",
+  "description": "A collaborative platform for connecting people and ideas.",
+  "author": "Your Name <your.email@example.com>",
   "scripts": {
     "dev": "next dev",
     "build": "next build",

@@ -23,7 +23,6 @@ export default function UserProfileForm({ person, user }: UserProfileFormProps) 
     full_name: person?.full_name || "",
     github_username: person?.github_username || "",
     twitter_username: person?.twitter_username || "",
-    labels: person?.labels || "",
   });
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
@@ -42,7 +41,7 @@ export default function UserProfileForm({ person, user }: UserProfileFormProps) 
     const supabase = createClient();
     const { error } = await supabase
       .from("people")
-      .update(form)
+      .update({ ...form, labels: ["rl attendee"] })
       .eq("id", user.id);
     setLoading(false);
     if (error) setMessage("Error updating profile");
@@ -120,15 +119,6 @@ export default function UserProfileForm({ person, user }: UserProfileFormProps) 
           className="border border-input bg-background p-2 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-primary/50 transition"
           name="twitter_username"
           value={form.twitter_username}
-          onChange={handleChange}
-        />
-      </label>
-      <label className="font-semibold text-foreground flex flex-col gap-1">
-        Label
-        <input
-          className="border border-input bg-background p-2 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-primary/50 transition"
-          name="labels"
-          value={form.labels}
           onChange={handleChange}
         />
       </label>
