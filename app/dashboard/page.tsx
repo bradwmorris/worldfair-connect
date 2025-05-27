@@ -62,6 +62,10 @@ export default async function DashboardPage() {
     (conn) => conn.author_person_id === user.id
   );
 
+  // Group connections by type
+  const talkConnections = connections.filter((c) => c.linked_talk_id);
+  const personConnections = connections.filter((c) => c.linked_target_person_id && !c.linked_talk_id);
+
   // Optionally, filter people/talks/talkSpeakers to only those referenced by the user's connections
   const userPeopleIds = new Set([
     ...connections.map((c) => c.author_person_id),
@@ -75,96 +79,109 @@ export default async function DashboardPage() {
   const filteredTalks = (talks || []).filter((t) => userTalkIds.has(t.id));
   const filteredTalkSpeakers = (talkSpeakers || []).filter((ts) => userTalkIds.has(ts.talk_id));
 
+  // Helper for pluralizing connection count
+  const connectionCount = connections.length;
+  const connectionText = connectionCount === 1 ? 'connection' : 'connections';
+
   return (
-    <div className="flex-1 w-full flex flex-col gap-12">
+    <div className="flex-1 w-full flex flex-col gap-10 md:gap-16">
+      {/* Intro message */}
       <div className="w-full">
-        <div className="bg-accent text-sm p-3 px-5 rounded-md text-foreground flex gap-3 items-center">
-          <InfoIcon size="16" strokeWidth={2} />
-          This is a protected page that you can only see as an authenticated
-          user
+        <div className="bg-muted/70 text-base p-4 px-6 rounded-lg text-foreground flex flex-col md:flex-row gap-2 md:gap-4 items-start md:items-center border border-border shadow-sm">
+          <span className="font-semibold text-lg">Hi{person?.full_name ? `, ${person.full_name}` : ''}! Welcome back.</span>
+          <span className="text-muted-foreground">You have <span className="font-semibold text-primary">{connectionCount}</span> {connectionText}.</span>
+          <a href="/chat" className="ml-0 md:ml-4 text-sm text-primary underline hover:text-primary/80 transition">Add more connections here</a>
         </div>
       </div>
-      <div className="flex flex-col gap-2 items-start">
-        <h2 className="font-bold text-2xl mb-4">Your user details</h2>
-        <div className="text-sm mb-2">
-          <p><strong>ID:</strong> {user.id}</p>
+      {/* User details card */}
+      <div className="flex flex-col gap-4 items-start w-full max-w-lg">
+        <h2 className="font-bold text-2xl mb-2 text-foreground/90">Your user details</h2>
+        <div className="w-full">
+          <UserProfileForm person={person} user={user} />
         </div>
-        <UserProfileForm person={person} user={user} />
       </div>
-      <div>
-        <h2 className="font-bold text-2xl mb-4">Your Connections</h2>
-        {connections && connections.length > 0 ? (
-          <ul className="list-disc pl-5">
-            {connections.map((connection) => {
-              let typeLabel = null;
-              let typeColor = '';
-              let typeName = '';
-              let avatars = null;
-              if (connection.linked_talk_id) {
-                typeLabel = 'Talk';
-                typeColor = 'bg-orange-500 text-white';
-                const talk = (talks || []).find((t) => t.id === connection.linked_talk_id);
-                typeName = talk ? talk.title : 'Unknown Talk';
-                // Find all speakers for this talk
-                const speakerLinks = (talkSpeakers || []).filter(ts => ts.talk_id === connection.linked_talk_id);
-                const speakerPeople = speakerLinks.map(ts => (people || []).find(p => p.id === ts.speaker_person_id)).filter(Boolean);
-                if (speakerPeople.length > 0) {
-                  avatars = (
-                    <div className="flex -space-x-2">
-                      {speakerPeople.map(speaker =>
-                        speaker.avatar_url ? (
+      {/* Connections Section */}
+      <div className="w-full">
+        <h2 className="font-bold text-2xl mb-4 text-foreground/90">Your Connections</h2>
+        <div className="flex flex-col gap-8">
+          {/* Talks Group */}
+          {talkConnections.length > 0 && (
+            <div>
+              <h3 className="text-lg font-semibold mb-2 text-orange-700/90">Talks</h3>
+              <ul className="flex flex-col gap-4">
+                {talkConnections.map((connection) => {
+                  const talk = (talks || []).find((t) => t.id === connection.linked_talk_id);
+                  const typeName = talk ? talk.title : 'Unknown Talk';
+                  const speakerLinks = (talkSpeakers || []).filter(ts => ts.talk_id === connection.linked_talk_id);
+                  const speakerPeople = speakerLinks.map(ts => (people || []).find(p => p.id === ts.speaker_person_id)).filter(Boolean);
+                  return (
+                    <li key={connection.id} className="rounded-lg border border-border bg-card/80 p-4 flex flex-col gap-2 shadow-sm">
+                      <div className="flex items-center gap-3 mb-1">
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-orange-100 text-orange-700 border border-orange-200">Talk</span>
+                        {speakerPeople.length > 0 && (
+                          <div className="flex -space-x-2">
+                            {speakerPeople.map(speaker =>
+                              speaker.avatar_url ? (
+                                <img
+                                  key={speaker.id}
+                                  src={speaker.avatar_url}
+                                  alt={speaker.full_name || 'Speaker'}
+                                  title={speaker.full_name || ''}
+                                  className="w-7 h-7 rounded-full border-2 border-orange-300 object-cover shadow"
+                                />
+                              ) : null
+                            )}
+                          </div>
+                        )}
+                        <span className="text-sm font-medium text-foreground/80">{typeName}</span>
+                      </div>
+                      <h4 className="font-semibold text-base text-foreground/90">{connection.title}</h4>
+                      <p className="text-sm text-muted-foreground">{connection.description}</p>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          )}
+          {/* People Group */}
+          {personConnections.length > 0 && (
+            <div>
+              <h3 className="text-lg font-semibold mb-2 text-blue-700/90">People</h3>
+              <ul className="flex flex-col gap-4">
+                {personConnections.map((connection) => {
+                  const person = (people || []).find((p) => p.id === connection.linked_target_person_id);
+                  const typeName = person ? person.full_name : 'Unknown Person';
+                  return (
+                    <li key={connection.id} className="rounded-lg border border-border bg-card/80 p-4 flex flex-col gap-2 shadow-sm">
+                      <div className="flex items-center gap-3 mb-1">
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-700 border border-blue-200">Person</span>
+                        {person && person.avatar_url && (
                           <img
-                            key={speaker.id}
-                            src={speaker.avatar_url}
-                            alt={speaker.full_name || 'Speaker'}
-                            title={speaker.full_name || ''}
-                            className="w-7 h-7 rounded-full border-2 border-orange-400 object-cover shadow"
+                            src={person.avatar_url}
+                            alt={person.full_name || 'Person'}
+                            title={person.full_name || ''}
+                            className="w-7 h-7 rounded-full border-2 border-blue-300 object-cover shadow"
                           />
-                        ) : null
-                      )}
-                    </div>
+                        )}
+                        <span className="text-sm font-medium text-foreground/80">{typeName}</span>
+                      </div>
+                      <h4 className="font-semibold text-base text-foreground/90">{connection.title}</h4>
+                      <p className="text-sm text-muted-foreground">{connection.description}</p>
+                    </li>
                   );
-                }
-              } else if (connection.linked_target_person_id) {
-                typeLabel = 'Person';
-                typeColor = 'bg-blue-500 text-white';
-                const person = (people || []).find((p) => p.id === connection.linked_target_person_id);
-                typeName = person ? person.full_name : 'Unknown Person';
-                if (person && person.avatar_url) {
-                  avatars = (
-                    <img
-                      src={person.avatar_url}
-                      alt={person.full_name || 'Person'}
-                      title={person.full_name || ''}
-                      className="w-7 h-7 rounded-full border-2 border-blue-400 object-cover shadow"
-                    />
-                  );
-                }
-              }
-              return (
-                <li key={connection.id} className="mb-4">
-                  <div className="flex items-center gap-2 mb-1">
-                    {typeLabel && (
-                      <span className={`px-2 py-0.5 rounded text-xs font-semibold ${typeColor}`}>{typeLabel}</span>
-                    )}
-                    {avatars}
-                    {typeName && (
-                      <span className="text-sm font-medium text-foreground/80">{typeName}</span>
-                    )}
-                  </div>
-                  <h3 className="font-semibold">{connection.title}</h3>
-                  <p className="text-sm text-gray-600">{connection.description}</p>
-                </li>
-              );
-            })}
-          </ul>
-        ) : (
-          <p>You haven't added any connections yet.</p>
-        )}
+                })}
+              </ul>
+            </div>
+          )}
+          {talkConnections.length === 0 && personConnections.length === 0 && (
+            <p className="text-muted-foreground">You haven't added any connections yet.</p>
+          )}
+        </div>
       </div>
-      <div>
-        <h2 className="font-bold text-2xl mb-4">Connection Map</h2>
-        <div style={{ width: '100%', height: '600px' }}>
+      {/* Connection Map */}
+      <div className="w-full">
+        <h2 className="font-bold text-2xl mb-4 text-foreground/90">Connection Map</h2>
+        <div className="rounded-lg border border-border bg-card/80 shadow-sm p-2 md:p-4" style={{ width: '100%', height: '600px' }}>
           <ConnectMap people={people || []} talks={filteredTalks} ideas={connections} talkSpeakers={talkSpeakers || []} />
         </div>
       </div>

@@ -66,173 +66,112 @@ const verticalGap = 60;
 const horizontalGap = 40;
 
 const ConnectMap: React.FC<ConnectMapProps> = ({ people, talks, ideas, talkSpeakers }) => {
+  // Helper: get all talks for a speaker
+  function getTalksForSpeaker(personId: string) {
+    return talkSpeakers
+      .filter(ts => ts.speaker_person_id === personId)
+      .map(ts => talks.find(t => t.id === ts.talk_id))
+      .filter(Boolean) as Talk[];
+  }
+
+  // Helper: get speakers for a talk
+  function getSpeakersForTalk(talkId: string) {
+    return talkSpeakers
+      .filter(ts => ts.talk_id === talkId)
+      .map(ts => people.find(p => p.id === ts.speaker_person_id))
+      .filter(Boolean) as Person[];
+  }
+
+  // Helper: get labels as array
+  function getLabels(person: Person) {
+    if (Array.isArray(person.labels)) return person.labels;
+    if (typeof person.labels === 'string') return [person.labels];
+    return [];
+  }
+
+  // Helper: get all person-to-person connections
+  function getPersonToPersonConnections() {
+    return ideas.filter(conn => conn.linked_target_person_id);
+  }
+
+  // Helper: get all person-to-talk connections
+  function getPersonToTalkConnections() {
+    return ideas.filter(conn => conn.linked_talk_id);
+  }
+
   const { nodes, edges } = useMemo(() => {
     const allNodes: Node[] = [];
     const allEdges: Edge[] = [];
-    const positionedTalks = new Set<string>();
-    let currentY = 20;
-
-    const peopleMap = new Map(people.map(p => [p.id, p]));
-    const talksMap = new Map(talks.map(t => [t.id, t]));
-
-    // Helper: get all speakers for a talk
-    function getSpeakersForTalk(talkId: string) {
-      return talkSpeakers
-        .filter(ts => ts.talk_id === talkId)
-        .map(ts => peopleMap.get(ts.speaker_person_id))
-        .filter(Boolean) as Person[];
-    }
-
-    // 1. Layout Speakers and their primary talk directly underneath
-    const speakers = people.filter(p => p.labels === 'speaker');
-    let speakerX = 20;
-    speakers.forEach((speaker, speakerIndex) => {
-      // Add speaker node
+    const nodeRadius = 250;
+    const centerX = 600;
+    const centerY = 500;
+    const personCount = people.length;
+    // Arrange people in a circle
+    people.forEach((person, idx) => {
+      const angle = (2 * Math.PI * idx) / personCount;
+      const x = centerX + nodeRadius * Math.cos(angle);
+      const y = centerY + nodeRadius * Math.sin(angle);
+      const isSpeaker = getLabels(person).includes('speaker');
+      const talksForSpeaker = isSpeaker ? getTalksForSpeaker(person.id) : [];
       allNodes.push({
-        id: `person-${speaker.id}`,
+        id: `person-${person.id}`,
         type: 'default',
         data: {
           label: (
-            <div style={{ textAlign: 'center', padding: '5px' }}>
-              {speaker.avatar_url && (
+            <div style={{
+              textAlign: 'center',
+              padding: '8px',
+              position: 'relative',
+              filter: isSpeaker ? 'drop-shadow(0 0 8px #FFC107)' : undefined,
+              background: isSpeaker ? 'rgba(255, 193, 7, 0.12)' : 'transparent',
+              borderRadius: 16,
+              border: isSpeaker ? '3px solid #FFC107' : 'none',
+              boxShadow: isSpeaker ? '0 4px 16px 0 #FFC10744' : undefined,
+              minWidth: 120,
+            }}>
+              {person.avatar_url && (
                 <img
-                  src={speaker.avatar_url}
-                  alt={speaker.full_name || 'User Avatar'}
+                  src={person.avatar_url}
+                  alt={person.full_name || 'User Avatar'}
                   style={{
                     width: 60,
                     height: 60,
                     borderRadius: '50%',
-                    border: `3px solid ${getNodeColor(speaker.labels)}`,
+                    border: `3px solid ${isSpeaker ? '#FFC107' : getNodeColor(getLabels(person)[0])}`,
                     marginBottom: '8px',
                     objectFit: 'cover',
                     boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
                   }}
                 />
               )}
-              <div style={{ fontWeight: 'bold', marginTop: '4px', color: '#333' }}>
-                {speaker.full_name || 'N/A'}
-              </div>
-              {speaker.labels && (
-                <div style={{
-                  fontSize: '0.8em',
-                  backgroundColor: getNodeColor(speaker.labels),
-                  color: '#fff',
-                  padding: '3px 10px',
-                  borderRadius: '12px',
-                  marginTop: '6px',
-                  display: 'inline-block',
-                  boxShadow: '0 1px 2px rgba(0,0,0,0.1)'
-                }}>
-                  {speaker.labels}
-                </div>
-              )}
-            </div>
-          )
-        },
-        position: { x: speakerX, y: currentY },
-        style: {
-          width: personNodeWidth,
-          minHeight: personNodeHeight - 20,
-          background: 'transparent',
-          border: 'none',
-        },
-      });
-
-      // Find and position the first talk for this speaker
-      const speakerTalkLink = talkSpeakers.find(ts => ts.speaker_person_id === speaker.id);
-      if (speakerTalkLink) {
-        const talk = talksMap.get(speakerTalkLink.talk_id);
-        if (talk && !positionedTalks.has(talk.id)) {
-          // Get all speakers for this talk
-          const talkSpeakersList = getSpeakersForTalk(talk.id);
-          allNodes.push({
-            id: `talk-${talk.id}`,
-            type: 'output',
-            data: { 
-              label: (
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <span style={{ fontSize: '1.2em' }}>💬</span>
-                    <span>{talk.title}</span>
-                  </div>
-                  {talkSpeakersList.length > 0 && (
-                    <div style={{ display: 'flex', gap: '4px', marginTop: 4 }}>
-                      {talkSpeakersList.map(speaker => (
-                        speaker.avatar_url ? (
-                          <img
-                            key={speaker.id}
-                            src={speaker.avatar_url}
-                            alt={speaker.full_name || 'Speaker'}
-                            title={speaker.full_name || ''}
-                            style={{
-                              width: 28,
-                              height: 28,
-                              borderRadius: '50%',
-                              border: '2px solid #FFC107',
-                              objectFit: 'cover',
-                              boxShadow: '0 1px 2px rgba(0,0,0,0.08)'
-                            }}
-                          />
-                        ) : null
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )
-            },
-            position: { x: speakerX + (personNodeWidth - talkNodeWidth)/2, y: currentY + personNodeHeight + verticalGap - 20},
-            style: {
-              border: '2px solid #FFB74D',
-              borderRadius: '10px',
-              padding: '10px 15px',
-              width: talkNodeWidth,
-              textAlign: 'left',
-              backgroundColor: '#FFF3E0',
-              boxShadow: '0 2px 5px rgba(0,0,0,0.08)',
-              color: '#424242'
-            },
-          });
-          positionedTalks.add(talk.id);
-          allEdges.push({
-            id: `edge-speaker-${speaker.id}-to-talk-${talk.id}`,
-            source: `person-${speaker.id}`,
-            target: `talk-${talk.id}`,
-            type: 'straight',
-            style: { stroke: '#FFC107', strokeWidth: 2 },
-            animated: false,
-          });
-        }
-      }
-      speakerX += personNodeWidth + horizontalGap;
-    });
-
-    currentY += personNodeHeight + talkNodeHeight + verticalGap * 1.5; // Move Y for next section
-
-    // 2. Layout other people (attendees, viewers)
-    const otherPeople = people.filter(p => p.labels !== 'speaker');
-    let otherPeopleX = 20;
-    otherPeople.forEach((person, index) => {
-      allNodes.push({
-        id: `person-${person.id}`,
-        type: 'default',
-        data: { // Re-using the styled label structure
-          label: (
-            <div style={{ textAlign: 'center', padding: '5px' }}>
-              {person.avatar_url && (
-                 <img src={person.avatar_url} alt={person.full_name || 'User Avatar'} style={{ width: 60, height: 60, borderRadius: '50%', border: `3px solid ${getNodeColor(person.labels)}`, marginBottom: '8px', objectFit: 'cover', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }} />
-              )}
-              <div style={{ fontWeight: 'bold', marginTop: '4px', color: '#333' }}>
+              <div style={{ fontWeight: 'bold', marginTop: '4px', color: isSpeaker ? '#FFC107' : '#333', textShadow: isSpeaker ? '0 1px 4px #fff' : undefined }}>
                 {person.full_name || 'N/A'}
               </div>
-              {person.labels && (
-                <div style={{ fontSize: '0.8em', backgroundColor: getNodeColor(person.labels), color: '#fff', padding: '3px 10px', borderRadius: '12px', marginTop: '6px', display: 'inline-block', boxShadow: '0 1px 2px rgba(0,0,0,0.1)' }}>
-                  {person.labels}
+              {getLabels(person).map(label => (
+                <div key={label} style={{ fontSize: '0.8em', backgroundColor: getNodeColor(label), color: '#fff', padding: '3px 10px', borderRadius: '12px', marginTop: '6px', display: 'inline-block', boxShadow: '0 1px 2px rgba(0,0,0,0.1)' }}>
+                  {label}
+                </div>
+              ))}
+              {/* Speaker's talks as icons */}
+              {isSpeaker && talksForSpeaker.length > 0 && (
+                <div style={{ display: 'flex', gap: 8, justifyContent: 'center', marginTop: 10 }}>
+                  {talksForSpeaker.map(talk => (
+                    <div key={talk.id} style={{ position: 'relative', display: 'inline-block' }}>
+                      <span
+                        style={{ cursor: 'pointer', fontSize: 22 }}
+                        title={talk.title}
+                      >
+                        {/* Simple talk icon (bubble) */}
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="#FFC107" stroke="#FFC107" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><ellipse cx="12" cy="12" rx="10" ry="8" /><path d="M8 16c0 1.5 2 2.5 4 2.5s4-1 4-2.5" fill="none" /></svg>
+                      </span>
+                    </div>
+                  ))}
                 </div>
               )}
             </div>
           )
         },
-        position: { x: otherPeopleX + (index % 5) * (personNodeWidth + horizontalGap), y: currentY + Math.floor(index / 5) * (personNodeHeight + verticalGap) },
+        position: { x, y },
         style: {
           width: personNodeWidth,
           minHeight: personNodeHeight - 20,
@@ -241,109 +180,34 @@ const ConnectMap: React.FC<ConnectMapProps> = ({ people, talks, ideas, talkSpeak
         },
       });
     });
-    const otherPeopleRows = Math.ceil(otherPeople.length / 5);
-    currentY += otherPeopleRows * (personNodeHeight + verticalGap) + verticalGap;
 
-    // 3. Layout any remaining talks (not positioned under a speaker yet)
-    let orphanTalkX = 20;
-    talks.forEach((talk, index) => {
-      if (!positionedTalks.has(talk.id)) {
-        // Get all speakers for this talk
-        const talkSpeakersList = getSpeakersForTalk(talk.id);
-        allNodes.push({
-          id: `talk-${talk.id}`,
-          type: 'output',
-          data: { 
-            label: (
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span style={{ fontSize: '1.2em' }}>💬</span>
-                  <span>{talk.title}</span>
-                </div>
-                {talkSpeakersList.length > 0 && (
-                  <div style={{ display: 'flex', gap: '4px', marginTop: 4 }}>
-                    {talkSpeakersList.map(speaker => (
-                      speaker.avatar_url ? (
-                        <img
-                          key={speaker.id}
-                          src={speaker.avatar_url}
-                          alt={speaker.full_name || 'Speaker'}
-                          title={speaker.full_name || ''}
-                          style={{
-                            width: 28,
-                            height: 28,
-                            borderRadius: '50%',
-                            border: '2px solid #FFC107',
-                            objectFit: 'cover',
-                            boxShadow: '0 1px 2px rgba(0,0,0,0.08)'
-                          }}
-                        />
-                      ) : null
-                    ))}
-                  </div>
-                )}
-              </div>
-            )
-          },
-          position: { x: orphanTalkX + (index % 4) * (talkNodeWidth + horizontalGap), y: currentY + Math.floor(index/4) * (talkNodeHeight + verticalGap)},
-          style: {
-            border: '2px solid #FFB74D',
-            borderRadius: '10px',
-            padding: '10px 15px',
-            width: talkNodeWidth,
-            textAlign: 'left',
-            backgroundColor: '#FFF3E0',
-            boxShadow: '0 2px 5px rgba(0,0,0,0.08)',
-            color: '#424242'
-          },
-        });
-        positionedTalks.add(talk.id); // Mark as positioned
-      }
-    });
-    const orphanTalkCount = talks.length - speakers.length; // Approximation, assuming most speakers had one talk placed
-    const orphanTalkRows = Math.ceil(Math.max(0, orphanTalkCount) / 4);
-    currentY += orphanTalkRows * (talkNodeHeight + verticalGap) + verticalGap;
-
-    // 4. Layout Connections (as edges only, no connection nodes)
-    ideas.forEach((connection) => {
-      // Draw edge from author to talk if linked_talk_id exists
-      if (connection.linked_talk_id) {
-        allEdges.push({
-          id: `edge-connection-${connection.id}`,
-          source: `person-${connection.author_person_id}`,
-          target: `talk-${connection.linked_talk_id}`,
-          animated: true,
-          style: { stroke: '#FF9800' },
-        });
-      }
-      // Draw edge from author to target person if linked_target_person_id exists
-      if (connection.linked_target_person_id) {
-        allEdges.push({
-          id: `edge-connection-${connection.id}`,
-          source: `person-${connection.author_person_id}`,
-          target: `person-${connection.linked_target_person_id}`,
-          animated: true,
-          style: { stroke: '#42A5F5' },
-        });
-      }
+    // Edges: person-to-person connections
+    getPersonToPersonConnections().forEach(conn => {
+      allEdges.push({
+        id: `edge-person-to-person-${conn.id}`,
+        source: `person-${conn.author_person_id}`,
+        target: `person-${conn.linked_target_person_id}`,
+        type: 'straight',
+        style: { stroke: '#2196F3', strokeWidth: 2, strokeDasharray: '6,2' },
+        animated: true,
+      });
     });
 
-    // 5. Add remaining speaker edges (e.g., for talks with multiple speakers)
-    talkSpeakers.forEach(link => {
-      const edgeExists = allEdges.some(edge =>
-        (edge.source === `person-${link.speaker_person_id}` && edge.target === `talk-${link.talk_id}`) ||
-        (edge.target === `person-${link.speaker_person_id}` && edge.source === `talk-${link.talk_id}`)
-      );
-      if (!edgeExists) {
-        allEdges.push({
-          id: `edge-speaker-${link.speaker_person_id}-to-talk-${link.talk_id}-secondary`,
-          source: `person-${link.speaker_person_id}`,
-          target: `talk-${link.talk_id}`,
-          type: 'straight',
-          style: { stroke: '#FFC107', strokeWidth: 1.5, strokeDasharray: '4,4' }, // Dashed for secondary speakers
-          animated: false,
-        });
-      }
+    // Edges: person-to-speaker-of-talk connections
+    getPersonToTalkConnections().forEach(conn => {
+      const speakers = conn.linked_talk_id ? getSpeakersForTalk(conn.linked_talk_id) : [];
+      speakers.forEach(speaker => {
+        if (speaker && conn.author_person_id !== speaker.id) {
+          allEdges.push({
+            id: `edge-person-to-speaker-${conn.id}-${speaker.id}`,
+            source: `person-${conn.author_person_id}`,
+            target: `person-${speaker.id}`,
+            type: 'straight',
+            style: { stroke: '#4CAF50', strokeWidth: 2 },
+            animated: true,
+          });
+        }
+      });
     });
 
     return { nodes: allNodes, edges: allEdges };
@@ -355,7 +219,7 @@ const ConnectMap: React.FC<ConnectMapProps> = ({ people, talks, ideas, talkSpeak
         nodes={nodes}
         edges={edges}
         fitView
-        fitViewOptions={{ padding: 0.2 }} // Increased padding slightly
+        fitViewOptions={{ padding: 0.2 }}
       >
         <Controls />
         <Background gap={20} color="#f0f0f0"/>
