@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { SmtpMessage } from "../smtp-message";
-import OAuthButtons from "../../components/OAuthButtons";
+// import OAuthButtons from "../../components/OAuthButtons";
 
 export default function SignUpFormWithOAuth({ searchParams }: { searchParams: Message }) {
   if ("message" in searchParams) {
@@ -27,7 +27,7 @@ export default function SignUpFormWithOAuth({ searchParams }: { searchParams: Me
             Sign in
           </Link>
         </p>
-        <OAuthButtons />
+        {/* <OAuthButtons /> */}
         <div className="flex flex-col gap-2 [&>input]:mb-3 mt-8">
           <Label htmlFor="email">Email</Label>
           <Input name="email" placeholder="you@example.com" required />
