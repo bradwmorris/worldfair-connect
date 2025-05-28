@@ -45,8 +45,8 @@ export default function RootLayout({
                       <Home size={20} />
                       <span className="sr-only">Home</span>
                     </Link>
-                    <Link href="/chat" title="Chat" className="flex items-center gap-1 ring-2 ring-green-500 rounded-full p-1 animate-pulse">
-                      <MessagesSquare size={20} />
+                    <Link href="/chat" title="Chat" className="flex items-center gap-1">
+                      <MessagesSquare size={20} className="text-green-500 drop-shadow-[0_0_6px_rgba(34,197,94,0.7)]" />
                       <span className="sr-only">Chat</span>
                     </Link>
                   </div>

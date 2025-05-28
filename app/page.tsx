@@ -132,7 +132,7 @@ export default async function Home() {
                             src={speaker.avatar_url}
                             alt={speaker.full_name || 'Speaker'}
                             title={speaker.full_name || ''}
-                            className="w-8 h-8 rounded-full border-2 border-border object-cover shadow-sm bg-background"
+                            className="w-14 h-14 rounded-full border-2 border-border object-cover shadow-sm bg-background"
                           />
                         ) : null
                       )}
