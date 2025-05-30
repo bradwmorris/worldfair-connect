@@ -1,27 +1,54 @@
-# Worldfair Connect
+# WorldFair Connect
 
-Worldfair Connect is a modern event mapping and visualization tool built with Next.js and Supabase. It helps organizers, speakers, and attendees see the full landscape of people and talks at a glance.
+A hack-together social graph for conference attendees—built on Next.js, Supabase, and Vercel.
+
+At the AI World Fair, attendees can sign up, record key takeaways, link ideas to speakers, and connect with others. All data feeds into a distributed "memory"/RAG system over talk transcripts.
+
+---
+
+## 🚀 Live Demo
+
+https://worldfair-connect.vercel.app/
+
+---
 
 ## Features
 
-- **People Directory:** Browse all participants, with avatars and role labels (speaker, attendee, viewer, etc).
-- **Talks Directory:** See all talks, each linked to its speaker.
-- **Role Distinction:** Instantly distinguish between speakers, attendees, and viewers with clear visual cues.
-- **(Optional) Visual Map:** Interactive node-based map of people and talks (using React Flow), showing connections between speakers and their talks.
-- **Supabase Backend:** Real-time, scalable data management for people, talks, and roles.
-- **Modern UI:** Built with Next.js App Router, Tailwind CSS, and shadcn/ui for a clean, responsive experience.
+- **Sign Up & Auth:** Email/password and OAuth sign-in, with secure session management.
+- **Profile Management:** Edit your name, email, GitHub, Twitter, and upload a profile image.
+- **Connections & Notes:** Log connections to people or talks, with summaries and notes, via a chat-like interface powered by OpenAI.
+- **Social Graph Map:** Visualize the network of attendees, speakers, and talks with an interactive map (React Flow + D3).
+- **Dashboard:** Tabbed dashboard for managing your connections, profile, talks, speakers, attendees, and map.
+- **Top Talks:** See the most connected/popular talks on the landing page.
+- **RAG-Ready:** Chat interface is designed for future integration with talk transcripts and context-rich retrieval.
+- **Tutorial Onboarding:** Step-by-step guides for connecting Supabase, signing up, and fetching data.
 
-## Use Cases
+---
 
-- **Event/Conference Management:** Organizers can manage and visualize the structure of an event, see who is speaking, what talks are scheduled, and how participants are connected.
-- **Attendee Discovery:** Attendees can browse the list of speakers and talks, and understand the event's structure at a glance.
-- **Speaker Overview:** Speakers can see their own sessions and who else is participating.
+## 🛠 Tech Stack
+
+- **Next.js 14 (App Router)**
+- **TypeScript**
+- **Tailwind CSS**
+- **shadcn/ui**
+- **Supabase (Postgres, Auth, Storage)**
+- **OpenAI API** (for embeddings, chat, and RAG)
+- **React Flow** (for graph visualization)
+- **Vercel** (hosting and preview URLs)
+
+---
 
 ## How It Works
 
-- **People Table:** Stores all users/participants with their roles and profile info.
-- **Talks Table:** Stores all talks, each linked to a speaker via a foreign key.
-- **/connect Page:** The main visualization page, showing all people and talks (optionally as a map, or as lists), with clear separation by role and (optionally) visual connections between speakers and their talks.
+- **People Table:** Stores all users/participants with roles, profile info, and avatars.
+- **Talks Table:** Stores all talks, each linked to speakers.
+- **Connections Table:** Logs user connections to people or talks, with summaries and notes.
+- **Talk Speakers Table:** Links talks to their speakers.
+- **/map:** Interactive visualization of the event's social graph.
+- **/dashboard:** Manage your profile, connections, and see your personalized event map.
+- **/chat:** AI-powered interface for reflecting on connections and logging notes.
+
+---
 
 ## Getting Started
 
@@ -43,6 +70,8 @@ Worldfair Connect is a modern event mapping and visualization tool built with Ne
    npm run dev
    ```
    The app will be running on [localhost:3000](http://localhost:3000/)
+
+---
 
 ## Feedback and Issues
 
